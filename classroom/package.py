@@ -16,13 +16,8 @@ def standalone_page():
     style = (STATIC / 'style.css').read_text(encoding='utf-8')
     worker = (STATIC / 'svd-worker.js').read_text(encoding='utf-8')
     app = (STATIC / 'app.js').read_text(encoding='utf-8')
-    # Browser-local uploads use blob URLs already. For bundled samples, read
-    # the exact same data URL from their thumbnails to avoid repeating bytes.
+    # The app reads sample URLs directly from the thumbnails embedded below.
     app = re.sub(r"new Worker\('svd-worker\.js(?:\?[^']*)?'\)", "new Worker(classroomWorkerURL())", app)
-    app = app.replace("selectSource('assets/'+key+'.jpg',samples[key],key,false)",
-                      "selectSource(button.querySelector('img').src,samples[key],key,false)")
-    app = app.replace("selectSource('assets/astronaut.jpg',samples.astronaut,'astronaut',false)",
-                      """selectSource(document.querySelector('[data-sample="astronaut"] img').src,samples.astronaut,'astronaut',false)""")
     if "assets/" in app or "new Worker('svd-worker.js" in app:
         raise ValueError('The offline sample or worker path needs updating.')
     helper = """

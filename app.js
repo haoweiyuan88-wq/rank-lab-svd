@@ -3,10 +3,10 @@
 const byId = (id) => document.getElementById(id);
 const original = byId('original');
 const result = byId('result');
+const workingCanvas = document.createElement('canvas');
 const rankInput = byId('rank');
 const focusRange = byId('focusRange');
 const formatNumber = new Intl.NumberFormat('en-US');
-const samples = {astronaut:'Astronaut',garden:'Pavilion',flower:'Flower'};
 const presets = [...document.querySelectorAll('[data-k]')];
 const sampleButtons = [...document.querySelectorAll('[data-sample]')];
 const maxEdge = 384;
@@ -123,9 +123,63 @@ function loading(text = '') {
   byId('resultWell').setAttribute('aria-busy', String(Boolean(text)));
 }
 
-function fittedDimensions(width, height) {
-  const scale = Math.min(1, maxEdge / Math.max(width, height));
+function fittedDimensions(width, height, limit) {
+  const scale = Math.min(1, limit / Math.max(width, height));
   return [Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale))];
+}
+
+function paintPhoto(canvas, image, width, height) {
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d', {willReadFrequently:true});
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,width,height);
+  ctx.imageSmoothingEnabled = width !== image.naturalWidth || height !== image.naturalHeight;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image,0,0,width,height);
+  return ctx;
+}
+
+function grayscale(rgba) {
+  for (let i=0; i<rgba.length; i+=4) {
+    const value = Math.round(.299*rgba[i] + .587*rgba[i+1] + .114*rgba[i+2]);
+    rgba[i] = rgba[i+1] = rgba[i+2] = value;
+  }
+}
+
+function makeMatrix(image, mode) {
+  const [width,height] = fittedDimensions(image.naturalWidth,image.naturalHeight,maxEdge);
+  const ctx = paintPhoto(workingCanvas,image,width,height);
+  const data = ctx.getImageData(0,0,width,height);
+  const rgba = data.data;
+  const channels = mode === 'gray' ? 1 : 3;
+  if (channels === 1) grayscale(rgba);
+  const pixels = new Uint8Array(width*height*channels);
+  for (let p=0; p<width*height; p++) {
+    for (let c=0; c<channels; c++) pixels[p*channels+c] = rgba[4*p+c];
+  }
+  return {width,height,channels,data,pixels};
+}
+
+function createSvdWorker() {
+  return new Worker('svd-worker.js?v=4');
+}
+
+function showOriginal(image, sampleKey, workingData, gray) {
+  // Bundled photos fit at native size. Bound the separate display buffer for large camera uploads.
+  const [width,height] = fittedDimensions(image.naturalWidth,image.naturalHeight,sampleKey ? Infinity : 2048);
+  if (width === workingData.width && height === workingData.height) {
+    original.width = width;
+    original.height = height;
+    original.getContext('2d').putImageData(workingData,0,0);
+    return;
+  }
+  const ctx = paintPhoto(original,image,width,height);
+  if (gray) {
+    const reference = ctx.getImageData(0,0,width,height);
+    grayscale(reference.data);
+    ctx.putImageData(reference,0,0);
+  }
 }
 
 function rangeStyle(el, k, cap) {
@@ -145,6 +199,7 @@ function reflectRank() {
   }
   byId('minus').disabled = !ready || k <= 1;
   byId('plus').disabled = !ready || k >= cap;
+  byId('openGallery').disabled = !ready;
   byId('rankValue').value = k;
   byId('rankHelp').textContent = channels === 1 ? 'Number of singular values to keep' : 'Singular values kept per color channel';
   byId('rangeCount').textContent = cap + ' available';
@@ -190,6 +245,13 @@ function copyCanvas(source, target) {
   target.getContext('2d').drawImage(source,0,0);
 }
 
+function originalBounds(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const scale = Math.min(rect.width/original.width,rect.height/original.height);
+  const width = original.width * scale, height = original.height * scale;
+  return {rect,width,height,left:(rect.width-width)/2,top:(rect.height-height)/2};
+}
+
 function drawLoupe() {
   if (!state.originalData || !state.point) return;
   const {width,height,originalData,point,mode} = state;
@@ -219,11 +281,10 @@ function drawLoupe() {
   const value = mode==='gray' ? 'Brightness ' + rgba[pi] : 'RGB ('+[rgba[pi],rgba[pi+1],rgba[pi+2]].join(', ')+')';
   byId('pixelInfo').textContent = 'Row ' + (point.y+1) + ', column ' + (point.x+1) + ' · ' + value;
   for (const [canvas,marker] of [[original,byId('pixelMarker')],[byId('originalLarge'),byId('focusMarker')]]) {
-    const rect = canvas.getBoundingClientRect();
-    const scale = Math.min(rect.width/width,rect.height/height);
-    if (scale > 0) {
-      marker.style.left = ((rect.width-width*scale)/2+(point.x+.5)*scale)+'px';
-      marker.style.top = ((rect.height-height*scale)/2+(point.y+.5)*scale)+'px';
+    const box = originalBounds(canvas);
+    if (box.width > 0 && box.height > 0) {
+      marker.style.left = (box.left+(point.x+.5)*box.width/width)+'px';
+      marker.style.top = (box.top+(point.y+.5)*box.height/height)+'px';
       marker.hidden = false;
     }
   }
@@ -231,11 +292,10 @@ function drawLoupe() {
 
 function pickPixel(event) {
   if (!state.originalData) return;
-  const rect = event.currentTarget.getBoundingClientRect();
-  const scale = Math.min(rect.width/state.width,rect.height/state.height);
-  if (!scale) return;
-  const x = Math.floor((event.clientX-rect.left-(rect.width-state.width*scale)/2)/scale);
-  const y = Math.floor((event.clientY-rect.top-(rect.height-state.height*scale)/2)/scale);
+  const box = originalBounds(event.currentTarget);
+  if (!box.width || !box.height) return;
+  const x = Math.floor((event.clientX-box.rect.left-box.left)*state.width/box.width);
+  const y = Math.floor((event.clientY-box.rect.top-box.top)*state.height/box.height);
   if (x<0 || x>=state.width || y<0 || y>=state.height) return;
   state.point = {x,y};
   drawLoupe();
@@ -255,6 +315,7 @@ function workerError(message) {
 
 function processImage(resetPoint) {
   if (!state.source) return;
+  if (byId('galleryDialog').open) byId('galleryDialog').close();
   if (state.job) state.job.terminate();
   state.job = null; state.ready = false; state.drawing = false; state.shown = 0; state.energy = null;
   dragStartRank = null;
@@ -264,40 +325,23 @@ function processImage(resetPoint) {
   byId('imageK').textContent = '…';
   loading('Decomposing the image…');
   const {image,name,key} = state.source;
-  const [width,height] = fittedDimensions(image.naturalWidth,image.naturalHeight);
+  const {width,height,channels,data,pixels} = makeMatrix(image,state.mode);
   state.width = width; state.height = height;
   state.capacity = Math.min(width,height);
   state.target = Math.min(state.capacity,state.target);
   state.from = Math.max(0,state.target-1);
   state.channel = state.mode === 'gray' ? 0 : Number(byId('probeChannel').value);
   byId('channelControl').hidden = state.mode === 'gray';
-  original.width = result.width = width;
-  original.height = result.height = height;
-  const ctx = original.getContext('2d',{willReadFrequently:true});
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,width,height);
-  ctx.imageSmoothingEnabled = width !== image.naturalWidth || height !== image.naturalHeight;
-  ctx.imageSmoothingQuality = 'high';
-  ctx.drawImage(image,0,0,width,height);
-  const data = ctx.getImageData(0,0,width,height);
-  const rgba = data.data;
-  const channels = state.mode === 'gray' ? 1 : 3;
-  const pixels = new Uint8Array(width*height*channels);
-  for(let p=0;p<width*height;p++){
-    const offset=4*p;
-    if(channels === 1){
-      const g=Math.round(.299*rgba[offset]+.587*rgba[offset+1]+.114*rgba[offset+2]);
-      rgba[offset]=rgba[offset+1]=rgba[offset+2]=pixels[p]=g;
-    } else {
-      pixels[3*p]=rgba[offset]; pixels[3*p+1]=rgba[offset+1]; pixels[3*p+2]=rgba[offset+2];
-    }
-  }
-  if(channels===1) ctx.putImageData(data,0,0);
+  result.width = width;
+  result.height = height;
+  showOriginal(image,key,data,channels===1);
   delete original.dataset.empty;
   result.dataset.empty="true";
   state.originalData=data;
   if(resetPoint || !state.point) state.point={x:Math.floor(width*.52),y:Math.floor(height*.46)};
   original.setAttribute('aria-label',name+' in '+(channels===1?'grayscale':'color')+'. Use the arrow keys to select a pixel.');
-  byId('dimensions').textContent='Working size '+width+' × '+height;
+  byId('dimensions').textContent='SVD grid '+width+' × '+height;
+  byId('sourceResolution').textContent=original.width+' × '+original.height+' px';
   byId('dimensions').title=name+' · Original '+image.naturalWidth+' × '+image.naturalHeight+' pixels · Working size '+width+' × '+height+' pixels';
   byId('gray').setAttribute('aria-pressed',String(channels===1));
   byId('rgb').setAttribute('aria-pressed',String(channels===3));
@@ -307,11 +351,15 @@ function processImage(resetPoint) {
   reflectRank(); drawLoupe();
   if(byId('focusDialog').open)copyCanvas(original,byId('originalLarge'));
   try {
-    const worker=new Worker('svd-worker.js?v=2');
+    const worker=createSvdWorker();
     state.job=worker;
     worker.addEventListener('error',()=> {if(state.job===worker)workerError('Processing stopped. Choose the image again.');});
     worker.onmessage=({data})=>{
       if(state.job!==worker) return;
+      if (data.type==='gallery' || data.type==='gallery-error') {
+        if (byId('galleryDialog').open) displayGallery(data);
+        return;
+      }
       if(data.type==='error'){workerError(data.message);return;}
       if(data.type==='ready'){
         state.ready=true; state.energy=data.cumulative;
@@ -377,10 +425,10 @@ function acceptFile(file) {
 
 byId('upload').addEventListener('click',()=>byId('file').click());
 byId('file').addEventListener('change',({target})=>{const file=target.files[0];target.value='';acceptFile(file);});
-for(const button of sampleButtons)button.addEventListener('click',()=>{
-  const key=button.dataset.sample;
-  selectSource('assets/'+key+'.jpg',samples[key],key,false);
-});
+function selectExample(button) {
+  selectSource(button.querySelector('img').src,button.textContent.trim(),button.dataset.sample,false);
+}
+for (const button of sampleButtons) button.addEventListener('click',()=>selectExample(button));
 for(const [id,mode] of [['gray','gray'],['rgb','rgb']])byId(id).addEventListener('click',()=>{
   if(state.mode===mode || !state.source)return;
   state.mode=mode;notice();processImage(false);
@@ -442,6 +490,7 @@ byId('expand').addEventListener('click',()=>{
   drawLoupe();
 });
 byId('focusDialog').addEventListener('close',()=>{
+  byId('originalLarge').width = byId('originalLarge').height = 1;
   byId('formulaHome').append(byId('liveFormula'));
   byId('comparison').insertBefore(byId('liveMap'),byId('examples'));
 });
@@ -463,4 +512,4 @@ byId('copyLink').addEventListener('click',async()=>{
   }
 });
 
-selectSource('assets/astronaut.jpg',samples.astronaut,'astronaut',false);
+selectExample(sampleButtons[0]);

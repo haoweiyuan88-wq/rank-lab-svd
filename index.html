@@ -7,9 +7,10 @@
   <meta name="description" content="Upload a photo and move the rank slider to see how singular values rebuild an image, one term at a time.">
   <title>SVD Image Lab · Rank Lab</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=4">
   <script defer src="assets/qr-code.js"></script>
-  <script defer src="app.js?v=2"></script>
+  <script defer src="app.js?v=4"></script>
+  <script defer src="activities.js?v=4"></script>
   <script defer src="sharing.js?v=2"></script>
 </head>
 <body>
@@ -75,7 +76,7 @@
           </figure>
         </div>
         <div class="frame-meta">
-          <span class="file-meta"><span id="sourceTitle"></span><span id="dimensions">Working size · —</span></span>
+          <span class="file-meta"><span id="sourceTitle"></span><span id="dimensions">SVD grid · —</span></span>
           <div class="frame-actions">
             <button class="quiet" id="expand" type="button" disabled><svg class="icon"><use href="#i-expand"/></svg>Enlarge view</button>
             <button class="quiet" id="download" type="button" disabled><svg class="icon"><use href="#i-download"/></svg>Save PNG</button>
@@ -90,11 +91,17 @@
           </div>
         </div>
         <div class="samples" id="examples">
-          <span class="samples-label">Examples</span>
+          <div class="examples-head">
+            <h3 class="samples-label">Examples</h3>
+            <div class="activity-actions">
+              <button class="activity-button" id="openGallery" type="button" aria-haspopup="dialog" disabled><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>Compare ranks</button>
+              <button class="activity-button" id="openGuess" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-pixel"/></svg>Guess the photo</button>
+            </div>
+          </div>
           <div class="sample-options" role="group" aria-label="Choose an example image">
-            <button class="sample" type="button" data-sample="astronaut" aria-pressed="true"><img src="assets/astronaut.jpg" alt=""><span>Astronaut</span></button>
-            <button class="sample" type="button" data-sample="garden" aria-pressed="false"><img src="assets/garden.jpg" alt=""><span>Pavilion</span></button>
-            <button class="sample" type="button" data-sample="flower" aria-pressed="false"><img src="assets/flower.jpg" alt=""><span>Flower</span></button>
+            <button class="sample" type="button" data-sample="silver-mask" aria-pressed="true"><img src="assets/silver-mask.jpg" alt=""><span class="sample-name"><small>The Weeknd</small> <span class="sr-only">· </span><strong>Oslo 2023</strong></span></button>
+            <button class="sample" type="button" data-sample="red-suit" aria-pressed="false"><img src="assets/red-suit.jpg" alt=""><span class="sample-name"><small>The Weeknd</small> <span class="sr-only">· </span><strong>After Hours</strong></span></button>
+            <button class="sample" type="button" data-sample="moon-stage" aria-pressed="false"><img src="assets/moon-stage.jpg" alt=""><span class="sample-name"><small>The Weeknd</small> <span class="sr-only">· </span><strong>After Hours Til Dawn</strong></span></button>
           </div>
         </div>
         <div id="dropHint" hidden>Drop to open this image</div>
@@ -172,6 +179,7 @@
     <div class="dialog-body reading">
       <h3>A photo as a matrix</h3>
       <p>Each grayscale pixel has a brightness from 0 to 255. An image with <i>m</i> rows and <i>n</i> columns stores <i>m × n</i> values. In color mode, red, green and blue each have their own matrix.</p>
+      <p>The original is displayed in high resolution. To keep the slider responsive, the reconstruction, pixel inspector and storage counts use an SVD grid of up to 384 pixels on its longer side.</p>
       <h3>Rebuilding an image one term at a time</h3>
       <p>Singular value decomposition writes the image as <span class="inline-math">A = UΣVᵀ</span>. The rank-<i>k</i> image is the sum of the first <i>k</i> terms, ordered from largest to smallest singular value. The starting image <span class="inline-math">A<sub>0</sub></span> is all zeros. At row <i>r</i> and column <i>c</i>, term <i>i</i> contributes <span class="inline-math">σ<sub>i</sub> × u<sub>i</sub>[r] × v<sub>i</sub>[c]</span>.</p>
       <p class="general-equation" role="math" aria-label="A sub k equals the sum from i equals one to k of sigma i times u i times v i transpose"><i>A</i><sub>k</sub> = <span class="summation"><span class="sum-upper">k</span><span class="sigma">∑</span><span class="sum-lower">i = 1</span></span> σ<sub>i</sub> <i>u</i><sub>i</sub> <i>v</i><sub>i</sub><sup>T</sup></p>
@@ -199,16 +207,39 @@
   <dialog id="creditDialog" aria-labelledby="creditTitle" class="sheet">
     <div class="dialog-head"><h2 id="creditTitle">Image credits</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body reading" id="creditBody">
-      <h3>Astronaut</h3><p>NASA astronaut Eileen Collins. The photograph is also available in the <a href="https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.astronaut" target="_blank" rel="noopener">scikit-image gallery</a>.</p>
-      <h3>Pavilion and flower</h3><p>The pavilion photo is by <a href="https://www.flickr.com/photos/danielbuechele/6061409035/" target="_blank" rel="noopener">Daniel Büchele</a> and the flower photo is by <a href="https://www.flickr.com/photos/vultilion/6056698931/" target="_blank" rel="noopener">Vultilion</a>. Both photos come from the scikit-learn sample gallery and are licensed under <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>. The lab resizes the images and can convert them to grayscale or reconstruct them.</p>
+      <h3>The Weeknd · Oslo 2023</h3><p><a href="https://www.flickr.com/photos/nrk-p3/52989881056/" target="_blank" rel="noopener">The Weeknd, Oslo 2023</a>. Photograph by Kim Erlandsen / NRK P3. The original photograph and its grayscale and SVD adaptations in this lab are shared under <a href="https://creativecommons.org/licenses/by-nc-sa/2.0/" target="_blank" rel="noopener">CC BY-NC-SA 2.0</a>.</p>
+      <h3>After Hours and After Hours Til Dawn</h3><p>AI-generated classroom illustrations inspired by The Weeknd’s <i>After Hours</i> red suit and the moon on the <i>After Hours Til Dawn</i> stage.</p>
       <h3>Interactive reference</h3><p><a href="https://timbaumann.info/svd-image-compression-demo/" target="_blank" rel="noopener">Tim Baumann’s SVD image compression demo</a>.</p>
+    </div>
+  </dialog>
+  <dialog id="galleryDialog" aria-labelledby="galleryTitle" class="sheet gallery-sheet">
+    <div class="dialog-head"><h2 id="galleryTitle">Compare ranks</h2><button class="icon-button close-dialog" type="button" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-body">
+      <p class="activity-source" id="gallerySource"></p>
+      <p class="activity-help">Choose a reconstruction to use its rank in the lab.</p>
+      <p id="galleryStatus" class="activity-status" role="status"></p>
+      <div id="galleryGrid" class="rank-gallery" role="group" aria-label="Choose a reconstruction"></div>
+    </div>
+  </dialog>
+  <dialog id="guessDialog" aria-labelledby="guessTitle" class="sheet guess-sheet">
+    <div class="dialog-head"><h2 id="guessTitle">Guess the photo</h2><button class="icon-button close-dialog" type="button" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-body">
+      <p id="guessPrompt" class="activity-source">Which photo is hidden?</p>
+      <div class="mystery-frame"><canvas id="guessCanvas" width="1" height="1" role="img" aria-label="Mystery reconstruction"></canvas></div>
+      <div class="mystery-status"><strong id="guessRank"></strong><span id="guessStatus" role="status" aria-live="polite"></span></div>
+      <div id="guessChoices" class="guess-choices" role="group" aria-label="Choose the photo"></div>
+      <div class="guess-actions">
+        <button class="activity-button" id="guessHint" type="button">More detail</button>
+        <button class="activity-button" id="guessReveal" type="button">Reveal photo</button>
+        <button class="primary" id="guessNext" type="button" hidden>Next photo</button>
+      </div>
     </div>
   </dialog>
   <dialog id="focusDialog" aria-labelledby="focusTitle" class="sheet focus-sheet">
     <div class="dialog-head"><h2 id="focusTitle">Enlarge view</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body">
       <div class="focus-images">
-        <figure><figcaption>Original</figcaption><div><canvas id="originalLarge" role="img" aria-label="Enlarged original. Tap a pixel or use the arrow keys to inspect it."></canvas><span class="pixel-marker" id="focusMarker" hidden aria-hidden="true"></span></div></figure>
+        <figure><figcaption>Original <small id="sourceResolution"></small></figcaption><div><canvas id="originalLarge" role="img" aria-label="Enlarged original. Tap a pixel or use the arrow keys to inspect it."></canvas><span class="pixel-marker" id="focusMarker" hidden aria-hidden="true"></span></div></figure>
         <figure><figcaption>Reconstruction <span id="focusK"></span></figcaption><div><canvas id="resultLarge" role="img" aria-label="Enlarged reconstruction"></canvas></div></figure>
       </div>
       <div class="focus-control"><label for="focusRange">Terms to keep <strong id="focusValue"></strong></label><input type="range" id="focusRange" min="1" max="256" value="5" step="1"></div>

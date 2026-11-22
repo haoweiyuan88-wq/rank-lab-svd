@@ -286,3 +286,69 @@ canvas.qr{width:clamp(200px,48vw,310px);height:auto;max-width:100%;background:wh
   .sample-options{column-gap:.2rem}
   .samples{flex-wrap:wrap}
 }
+
+.samples{display:block;padding:.83rem 0 .95rem}
+.examples-head,.activity-actions,.guess-actions,.guess-choices{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem}
+.examples-head{justify-content:space-between;margin-bottom:.6rem}
+.examples-head .samples-label{font-size:.98rem;font-weight:650;color:var(--ink)}
+.activity-button,.guess-choice{
+  display:inline-flex;align-items:center;justify-content:center;gap:.34rem;min-height:2.25rem;
+  padding:.28rem .67rem;border:1px solid #ced8c9;border-radius:.48rem;background:white;font-size:.81rem;font-weight:600;
+}
+.activity-button .icon{width:1rem;height:1rem}
+.activity-button:hover:enabled,.guess-choice:hover:enabled{border-color:#789758;background:#f0f7e8}
+#openGuess,#guessHint{background:#eff7e6;border-color:#b1c796;color:#31521c}
+#openGuess:hover,#guessHint:hover:enabled{background:#e2f1ce}
+.sample-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.43rem}
+.sample-options .sample{display:flex;align-items:center;gap:.48rem;min-width:0;text-align:left;padding:.3rem;border-radius:.55rem}
+.sample-options .sample img{width:clamp(2.4rem,4.4vw,3.45rem);height:2.95rem;flex:none;object-fit:cover;border-radius:.33rem}
+.sample-name{display:flex;flex-direction:column;min-width:0;gap:.1rem;line-height:1.22}
+.sample-name small{color:var(--soft);font-size:.69rem;font-weight:500}
+.sample-name strong{font-size:.87rem;font-weight:650}
+.frame-meta{flex-wrap:wrap}
+.frame-meta .file-meta{flex:1 1 auto;flex-wrap:wrap}
+#sourceTitle{max-width:22rem}
+.gallery-sheet{width:min(48rem,calc(100vw - 1.25rem))}
+.guess-sheet{width:min(39rem,calc(100vw - 1.25rem))}
+.guess-sheet::backdrop{background:#16211c}
+.activity-source{font-weight:650;font-size:1rem;overflow-wrap:anywhere}
+.activity-help,.activity-status,.mystery-status{font-size:.87rem;color:var(--soft)}
+.activity-help{margin-top:.14rem}
+.activity-status:not(:empty){margin-top:.65rem}
+.rank-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.62rem}
+.rank-gallery:not(:empty){margin-top:.8rem}
+.gallery-option{border:1px solid #cbd5c5;border-radius:.62rem;background:white;overflow:hidden;padding:0;text-align:left;min-width:0}
+.gallery-option[aria-pressed=true],.gallery-option:hover{border-color:#769850;background:#eff7e6}
+.gallery-option[aria-pressed=true]{box-shadow:0 0 0 1px #769850}
+.gallery-option canvas{display:block;width:100%;height:clamp(5.8rem,20vh,11.5rem);object-fit:contain;background:#202a24}
+.gallery-option>span{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.12rem .4rem;padding:.42rem .62rem}
+.gallery-option strong,.mystery-status strong{font:600 .91rem/1.4 var(--mono)}
+.gallery-option small{font-size:.77rem;color:var(--soft)}
+.mystery-frame{height:clamp(9rem,33vh,20rem);margin:.65rem 0;background:#202a24;border-radius:.55rem;overflow:hidden}
+.mystery-frame canvas{display:block;width:100%;height:100%;object-fit:contain}
+.mystery-status{display:flex;align-items:baseline;flex-wrap:wrap;gap:.12rem .65rem}
+.mystery-status strong{color:var(--green-deep)}
+.guess-choices:not([hidden]){margin-top:.67rem}
+.guess-choice:disabled{cursor:default}
+.guess-actions{border-top:1px solid var(--line);margin-top:.8rem;padding-top:.75rem}
+.guess-actions .primary{font-size:.86rem;padding:.4rem .88rem}
+@media(max-width:650px){
+  .samples{padding:.7rem 0}
+  .examples-head{gap:.35rem}
+  .activity-actions{gap:.3rem}
+  .activity-button,.guess-choice,.guess-actions .primary{min-height:2.75rem;padding-inline:.48rem}
+  .sample-options .sample{flex-direction:column;align-items:stretch;gap:.3rem;padding:.25rem}
+  .sample-options .sample img{width:100%;height:clamp(3.25rem,13.5vw,5.5rem)}
+  .sample-name{padding:.05rem .12rem .18rem}
+  .sample-name strong{font-size:.8rem}
+  .sample-name small{font-size:.65rem}
+  .frame-meta .file-meta{flex:1 0 100%;gap:.25rem}
+  .frame-meta #sourceTitle{max-width:100%}
+  .frame-meta .frame-actions{margin-left:0}
+  .gallery-option>span{padding:.35rem .45rem}
+}
+@media(max-width:375px){
+  .activity-actions .icon{display:none}
+  .activity-actions .activity-button{font-size:.76rem}
+  .gallery-option>span{align-items:flex-start;flex-direction:column}
+}

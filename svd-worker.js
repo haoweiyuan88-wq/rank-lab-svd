@@ -272,6 +272,9 @@ self.onmessage = ({data}) => {
     if (data.type === 'init') {
       model = initialize(data);
       self.postMessage({type:'ready', cumulative: model.cumulative});
+    } else if (data.type === 'gallery' && model) {
+      const frames = data.ranks.map(model.render);
+      self.postMessage({type:'gallery', frames}, frames.map(frame => frame.rgba.buffer));
     } else if (data.type === 'draw' && model) {
       const {k,from,x,y,channel,key,includeImage} = data;
       const frame = includeImage === false ? {k} : model.render(k);
@@ -279,6 +282,6 @@ self.onmessage = ({data}) => {
       self.postMessage({type:'frame', ...frame, key, evidence}, frame.rgba ? [frame.rgba.buffer] : []);
     }
   } catch (error) {
-    self.postMessage({type:'error', message: error.message});
+    self.postMessage({type:data.type==='gallery' ? 'gallery-error' : 'error', message:error.message});
   }
 };
