@@ -70,7 +70,7 @@ function symmetricEigen(matrix, n) {
       while (end < n - 1 && Math.abs(off[end]) > Number.EPSILON *
         (Math.abs(diag[end]) + Math.abs(diag[end + 1]))) end++;
       if (end === first) break;
-      if (++iterations > 100) throw new Error('数值分解未收敛，请换一张图片重试。');
+      if (++iterations > 100) throw new Error('The decomposition did not converge. Try another image.');
       let g = (diag[first + 1] - diag[first]) / (2 * off[first]);
       const shift = Math.hypot(g, 1);
       g = diag[end] - diag[first] + off[first] / (g + (g < 0 ? -shift : shift));
@@ -209,7 +209,63 @@ function initialize({width, height, channels, pixels}) {
     }
     return {k, rgba};
   }
-  return {cumulative, render};
+  // Sample the signed difference before any clipping or rounding for display.
+  // Cache the last map so clicking another pixel only recalculates its equation.
+  let lastMap;
+  function changeMap(from, to, channel) {
+    if (lastMap && lastMap.from === from && lastMap.to === to && lastMap.channel === channel) {
+      return lastMap;
+    }
+    const scale = Math.min(1, 110 / Math.max(width, height));
+    const w = Math.max(1, Math.round(width * scale));
+    const h = Math.max(1, Math.round(height * scale));
+    const xs = Array.from({length:w}, (_, x) => Math.min(width-1, Math.floor((x+.5)*width/w)));
+    const ys = Array.from({length:h}, (_, y) => Math.min(height-1, Math.floor((y+.5)*height/h)));
+    const values = new Float64Array(w*h);
+    const {left,right} = factors[channel];
+    const sign = to >= from ? 1 : -1;
+    for (let t = Math.min(from,to); t < Math.max(from,to); t++) {
+      const a = t*height, b = t*width;
+      for (let y = 0; y < h; y++) {
+        const weight = sign * left[a+ys[y]];
+        for (let x = 0; x < w; x++) values[y*w+x] += weight * right[b+xs[x]];
+      }
+    }
+    let peak = 0;
+    for (const value of values) peak = Math.max(peak, Math.abs(value));
+    const rgba = new Uint8ClampedArray(4*w*h);
+    const neutral = [46,58,55], brighter = [205,247,137], darker = [255,154,128];
+    for (let p = 0; p < values.length; p++) {
+      const color = values[p] >= 0 ? brighter : darker;
+      const intensity = peak > 1e-7 ? Math.sqrt(Math.abs(values[p]) / peak) : 0;
+      for (let c = 0; c < 3; c++) rgba[4*p+c] = neutral[c] + intensity * (color[c]-neutral[c]);
+      rgba[4*p+3] = 255;
+    }
+    lastMap = {from,to,channel,width:w,height:h,rgba};
+    return lastMap;
+  }
+
+  function inspect(from, to, x, y, channel) {
+    const {left,right,energy} = factors[channel];
+    const high = Math.max(from,to);
+    let before = 0, after = 0;
+    for (let t = 0; t < high; t++) {
+      const value = left[t*height+y] * right[t*width+x];
+      if (t < from) before += value;
+      if (t < to) after += value;
+    }
+    let term = null;
+    if (from !== to) {
+      const i = high-1, sigma = Math.sqrt(energy[i]);
+      // One stored vector absorbs sigma. Divide that vector by sigma to show
+      // the normalized singular-vector entries used in the textbook formula.
+      const l = left[i*height+y], r = right[i*width+x];
+      term = {index:high, sigma, u:sigma && height>width ? l/sigma : l,
+              v:sigma && height<=width ? r/sigma : r, value:l*r};
+    }
+    return {before, after, delta:after-before, term, map:changeMap(from,to,channel)};
+  }
+  return {cumulative, render, inspect};
 }
 self.onmessage = ({data}) => {
   try {
@@ -217,8 +273,10 @@ self.onmessage = ({data}) => {
       model = initialize(data);
       self.postMessage({type:'ready', cumulative: model.cumulative});
     } else if (data.type === 'draw' && model) {
-      const frame = model.render(data.k);
-      self.postMessage({type:'frame', ...frame}, [frame.rgba.buffer]);
+      const {k,from,x,y,channel,key,includeImage} = data;
+      const frame = includeImage === false ? {k} : model.render(k);
+      const evidence = key ? model.inspect(from,k,x,y,channel) : null;
+      self.postMessage({type:'frame', ...frame, key, evidence}, frame.rgba ? [frame.rgba.buffer] : []);
     }
   } catch (error) {
     self.postMessage({type:'error', message: error.message});

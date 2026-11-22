@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fafaf7">
-  <meta name="description" content="把照片变成一场线性代数实验。上传自己的图片，拖动 k，实时观察 SVD 重建图、公式和数据量。">
-  <title>SVD 图像实验室 · Rank Lab</title>
+  <meta name="description" content="Upload a photo and move the rank slider to see how singular values rebuild an image, one term at a time.">
+  <title>SVD Image Lab · Rank Lab</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
   <script defer src="assets/qr-code.js"></script>
-  <script defer src="app.js"></script>
-  <script defer src="sharing.js"></script>
+  <script defer src="app.js?v=2"></script>
+  <script defer src="sharing.js?v=2"></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="icon-defs" aria-hidden="true">
@@ -30,15 +30,15 @@
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18m6-18v18"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
   </svg>
-  <a href="#lab" class="skip">进入实验区</a>
+  <a href="#lab" class="skip">Skip to experiment</a>
   <header class="mast">
     <div class="wrap mast-inner">
-      <a class="brand" href="#top" aria-label="Rank Lab 首页"><img src="assets/mark.svg" alt="" width="34" height="34"><span>Rank <b>Lab</b></span></a>
-      <span class="mast-divider"></span><span class="mast-caption">线性代数实验室</span>
-      <nav aria-label="主导航">
-        <a class="nav-lab" href="#lab">实验台</a>
-        <button class="nav-plain" id="openInfo" type="button">实验原理</button>
-        <button class="share-button" id="openShare" type="button"><svg class="icon"><use href="#i-qr"/></svg>分享实验</button>
+      <a class="brand" href="#top" aria-label="Rank Lab home"><img src="assets/mark.svg" alt="" width="34" height="34"><span>Rank <b>Lab</b></span></a>
+      <span class="mast-divider"></span><span class="mast-caption">Linear Algebra Lab</span>
+      <nav aria-label="Main navigation">
+        <a class="nav-lab" href="#lab">Experiment</a>
+        <button class="nav-plain" id="openInfo" type="button">How it works</button>
+        <button class="share-button" id="openShare" type="button"><svg class="icon"><use href="#i-qr"/></svg>Share</button>
       </nav>
     </div>
   </header>
@@ -46,146 +46,173 @@
   <main id="top" class="wrap">
     <section class="intro" aria-labelledby="page-title">
       <div>
-        <h1 id="page-title"><span>SVD</span> 图像实验室</h1>
-        <p>一张照片，保留多少信息就能认出来？拖动 <i>k</i>，看轮廓如何变成细节。</p>
+        <h1 id="page-title"><span>SVD</span> Image Lab</h1>
+        <p>How much of a photo do you need to recognize it? Move <i>k</i> to see which details return.</p>
       </div>
-      <button class="primary upload" id="upload" type="button"><svg class="icon"><use href="#i-upload"/></svg>上传自己的图片</button>
-      <input id="file" class="sr-only" tabindex="-1" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp">
+      <button class="primary upload" id="upload" type="button"><svg class="icon"><use href="#i-upload"/></svg>Upload an image</button>
+      <input id="file" class="sr-only" aria-label="Choose an image file" tabindex="-1" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/bmp">
     </section>
     <div id="message" class="message" hidden role="status"></div>
-    <noscript><p>请启用浏览器的 JavaScript 来拖动滑块和重建照片。</p></noscript>
+    <noscript><p>Enable JavaScript to move the slider and reconstruct an image.</p></noscript>
 
-    <section class="work-grid" id="lab" aria-label="图像重建实验台">
+    <section class="work-grid" id="lab" aria-label="Image reconstruction experiment">
       <div class="card comparison" id="comparison">
         <div class="panel-head comparison-head">
-          <h2><svg class="icon section-icon"><use href="#i-panel"/></svg>图像对照</h2>
-          <div class="segmented" role="group" aria-label="图像模式">
-            <button type="button" id="gray" aria-pressed="true">灰度</button>
-            <button type="button" id="rgb" aria-pressed="false">彩色</button>
+          <h2><svg class="icon section-icon"><use href="#i-panel"/></svg>Image comparison</h2>
+          <div class="segmented" role="group" aria-label="Image mode">
+            <button type="button" id="gray" aria-pressed="true">Grayscale</button>
+            <button type="button" id="rgb" aria-pressed="false">Color</button>
           </div>
         </div>
         <div class="frames">
           <figure>
-            <div class="frame-head"><span class="frame-title"><i class="frame-key original-key"></i>原图</span><span class="frame-symbol">A</span></div>
-            <div class="image-well" id="originalWell"><canvas id="original" width="1" height="1" role="img" data-empty="true" aria-label="当前模式下的原图"></canvas><span id="pixelMarker" hidden aria-hidden="true"></span></div>
+            <div class="frame-head"><span class="frame-title"><i class="frame-key original-key"></i>Original</span><span class="frame-symbol">A</span></div>
+            <div class="image-well" id="originalWell"><canvas id="original" width="1" height="1" role="img" data-empty="true" aria-label="Original image in the current color mode"></canvas><span class="pixel-marker" id="pixelMarker" hidden aria-hidden="true"></span></div>
           </figure>
           <figure>
-            <div class="frame-head"><span class="frame-title"><i class="frame-key result-key"></i>重建图</span><span class="frame-symbol accent">A<sub id="imageK">5</sub></span></div>
-            <div class="image-well" id="resultWell"><canvas id="result" width="1" height="1" role="img" data-empty="true" aria-label="保留前 k 个奇异值的重建图"></canvas><span class="loading" id="loading" role="status">正在准备图像…</span></div>
+            <div class="frame-head"><span class="frame-title"><i class="frame-key result-key"></i>Reconstruction</span><span class="frame-symbol accent">A<sub id="imageK">5</sub></span></div>
+            <div class="image-well" id="resultWell"><canvas id="result" width="1" height="1" role="img" data-empty="true" aria-label="Reconstruction using the first k singular values"></canvas><span class="loading" id="loading" role="status">Preparing image…</span></div>
           </figure>
         </div>
         <div class="frame-meta">
-          <span class="file-meta"><span id="sourceTitle"></span><span id="dimensions">计算尺寸 · —</span></span>
+          <span class="file-meta"><span id="sourceTitle"></span><span id="dimensions">Working size · —</span></span>
           <div class="frame-actions">
-            <button class="quiet" id="expand" type="button" disabled><svg class="icon"><use href="#i-expand"/></svg>放大对照</button>
-            <button class="quiet" id="download" type="button" disabled><svg class="icon"><use href="#i-download"/></svg>保存重建图</button>
+            <button class="quiet" id="expand" type="button" disabled><svg class="icon"><use href="#i-expand"/></svg>Enlarge view</button>
+            <button class="quiet" id="download" type="button" disabled><svg class="icon"><use href="#i-download"/></svg>Save PNG</button>
           </div>
         </div>
-        <div class="samples">
-          <span class="samples-label">示例图片</span>
-          <div class="sample-options" role="group" aria-label="选择示例图片">
-            <button class="sample" type="button" data-sample="astronaut" aria-pressed="true"><img src="assets/astronaut.jpg" alt=""><span>宇航员</span></button>
-            <button class="sample" type="button" data-sample="garden" aria-pressed="false"><img src="assets/garden.jpg" alt=""><span>古建筑</span></button>
-            <button class="sample" type="button" data-sample="flower" aria-pressed="false"><img src="assets/flower.jpg" alt=""><span>花卉</span></button>
+        <div class="change-strip" id="liveMap" aria-labelledby="mapTitle">
+          <div class="map-well"><canvas id="changeMap" width="1" height="1" role="img" aria-label="Signed image changes"></canvas></div>
+          <div class="map-notes"><h3 id="mapTitle">Where the image changed</h3>
+            <p id="mapStep">Preparing the change map…</p>
+            <div class="map-legend"><span><i class="brighter"></i>Brighter</span><span><i class="darker"></i>Darker</span><span><i class="unchanged"></i>No change</span></div>
+            <small>Contrast boosted for visibility.</small>
           </div>
         </div>
-        <div id="dropHint" hidden>松开即可打开这张图片</div>
+        <div class="samples" id="examples">
+          <span class="samples-label">Examples</span>
+          <div class="sample-options" role="group" aria-label="Choose an example image">
+            <button class="sample" type="button" data-sample="astronaut" aria-pressed="true"><img src="assets/astronaut.jpg" alt=""><span>Astronaut</span></button>
+            <button class="sample" type="button" data-sample="garden" aria-pressed="false"><img src="assets/garden.jpg" alt=""><span>Pavilion</span></button>
+            <button class="sample" type="button" data-sample="flower" aria-pressed="false"><img src="assets/flower.jpg" alt=""><span>Flower</span></button>
+          </div>
+        </div>
+        <div id="dropHint" hidden>Drop to open this image</div>
       </div>
 
-      <aside class="control-stack" aria-label="参数与公式">
+      <aside class="control-stack" aria-label="Rank and live equation">
         <div class="card rank-card">
-          <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-sliders"/></svg>重建参数</h2><span id="rangeCount" class="subtle">—</span></div>
+          <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-sliders"/></svg>Reconstruction rank</h2><span id="rangeCount" class="subtle">—</span></div>
           <div class="rank-line">
             <label for="rank" class="rank-label"><span class="math-k">k</span><span class="equals">=</span><output id="rankValue">5</output></label>
             <div class="stepper">
-              <button type="button" id="minus" disabled aria-label="减少一个奇异值"><svg class="icon"><use href="#i-minus"/></svg></button>
-              <button type="button" id="plus" disabled aria-label="增加一个奇异值"><svg class="icon"><use href="#i-plus"/></svg></button>
+              <button type="button" id="minus" disabled aria-label="Remove one term"><svg class="icon"><use href="#i-minus"/></svg></button>
+              <button type="button" id="plus" disabled aria-label="Add one term"><svg class="icon"><use href="#i-plus"/></svg></button>
             </div>
           </div>
-          <p class="control-desc" id="rankHelp">保留的奇异值个数</p>
-          <input type="range" id="rank" min="1" max="256" step="1" value="5" aria-describedby="rankHelp" aria-label="保留的奇异值个数 k" disabled>
-          <div class="range-captions"><span>1 · 少量成分</span><span><span id="maxRank">—</span> · 全部成分</span></div>
-          <div class="presets" role="group" aria-label="课堂常用 k 值">
+          <p class="control-desc" id="rankHelp">Number of singular values to keep</p>
+          <input type="range" id="rank" min="1" max="256" step="1" value="5" aria-describedby="rankHelp" aria-label="Number of singular values to keep, k" disabled>
+          <div class="range-captions"><span>1 · Fewest terms</span><span><span id="maxRank">—</span> · All terms</span></div>
+          <div class="presets" role="group" aria-label="Rank presets">
             <button type="button" data-k="5">5</button><button type="button" data-k="20">20</button><button type="button" data-k="50">50</button><button type="button" data-k="100">100</button>
           </div>
         </div>
-        <div class="formula-card">
-          <div class="formula-title"><span class="fx" aria-hidden="true">ƒ<span>x</span></span><h2>实时重建公式</h2><span id="energy" hidden title="前 k 项奇异值平方和占全部奇异值平方和的比例"></span></div>
-          <div class="formula-display" role="math" id="formula" aria-label="重建公式">
-            <span>A<sub data-form-k>5</sub></span><span class="op">=</span>
-            <span class="summation"><span class="sum-upper" data-form-k>5</span><span class="sigma">∑</span><span class="sum-lower">i = 1</span></span>
-            <span class="term">σ<sub>i</sub> u<sub>i</sub> v<sub>i</sub><sup>T</sup></span>
-          </div>
-          <p id="formulaText">把最大的 5 个奇异值对应的成分相加。</p>
+        <div id="formulaHome">
+          <section class="formula-card" id="liveFormula" aria-labelledby="formulaTitle">
+            <div class="formula-title"><h2 id="formulaTitle">Live reconstruction</h2><span id="energy" hidden title="Fraction of total squared singular values retained, across all image channels"></span></div>
+            <p class="step-description" id="stepDescription">Preparing the equation…</p>
+            <div class="formula-display" id="formula" role="math" aria-label="Reconstruction equation">A<sub>k</sub></div>
+            <div class="pixel-heading">
+              <div><h3>One pixel, step by step</h3><span id="probeLocation">Select a pixel in the original.</span></div>
+              <label class="channel-control" id="channelControl" hidden><span class="sr-only">Channel for the equation and change map</span>
+                <select id="probeChannel"><option value="0">Red</option><option value="1">Green</option><option value="2">Blue</option></select>
+              </label>
+            </div>
+            <div class="pixel-equation" id="pixelEquation" role="math" aria-label="Pixel brightness calculation">
+              <div><small id="beforeLabel">Before</small><strong id="pixelBefore">—</strong></div>
+              <span class="pixel-op" id="deltaSign">+</span>
+              <div class="change-value"><small>Change</small><strong id="pixelChange">—</strong></div>
+              <span class="pixel-op">≈</span>
+              <div><small id="afterLabel">After</small><strong id="pixelAfter">—</strong></div>
+            </div>
+            <div class="term-detail" id="termDetail" hidden>
+              <div class="term-caption" id="termCaption"></div>
+              <p class="factor-equation" id="termFactors"></p>
+            </div>
+          </section>
         </div>
       </aside>
     </section>
 
-    <section class="insights" aria-label="数据量与像素观察">
+    <section class="insights" aria-label="Storage and pixel inspection">
       <div class="card numbers-card">
-        <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-grid"/></svg>要保存多少个数？</h2></div>
+        <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-grid"/></svg>How many values do we store?</h2></div>
         <div class="metrics">
-          <div><span>原图数值</span><strong id="originalCount">—</strong></div>
-          <div><span>SVD 数值</span><strong id="factorCount">—</strong></div>
-          <div><span>理论数据占比</span><strong class="accent" id="storageRatio">—</strong></div>
+          <div><span>Original values</span><strong id="originalCount">—</strong></div>
+          <div><span>SVD values</span><strong id="factorCount">—</strong></div>
+          <div><span>Share of original</span><strong class="accent" id="storageRatio">—</strong></div>
         </div>
-        <p class="calc-note" id="storageCalc">按矩阵元素个数比较。</p>
-        <p class="fineprint">按相同精度比较数值个数。实际 PNG、JPEG 文件大小还取决于编码方式。</p>
+        <p class="calc-note" id="storageCalc">Counting matrix entries.</p>
+        <p class="fineprint">Counts assume equal precision per value. PNG and JPEG file sizes also depend on how the image is encoded.</p>
       </div>
       <div class="card pixels-card">
-        <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-pixel"/></svg>像素放大镜</h2><span class="subtle mono" id="gridSize">8 × 8</span></div>
+        <div class="panel-head"><h2><svg class="icon section-icon"><use href="#i-pixel"/></svg>Pixel inspector</h2><span class="subtle mono" id="gridSize">8 × 8</span></div>
         <div class="pixel-body">
-          <canvas id="pixelGrid" width="8" height="8" role="img" aria-label="所选位置周围的原图像素方格"></canvas>
-          <div><p>点一下原图，把这一小块放大。</p><p class="pixel-value" id="pixelInfo">每个方格代表一个像素。</p></div>
+          <canvas id="pixelGrid" width="8" height="8" role="img" aria-label="Original pixels around the selected position"></canvas>
+          <div><p>Tap the original to inspect a pixel in the live equation. Use the arrow keys to move one pixel.</p><p class="pixel-value" id="pixelInfo">Each square represents one pixel.</p></div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="wrap footer"><span><svg class="icon"><use href="#i-lock"/></svg>照片只在你的浏览器中处理</span><button class="footer-button" id="credits" type="button">示例图片与来源</button></footer>
+  <footer class="wrap footer"><span><svg class="icon"><use href="#i-lock"/></svg>Your photos are processed in your browser.</span><button class="footer-button" id="credits" type="button">Image credits</button></footer>
 
   <dialog id="infoDialog" aria-labelledby="infoTitle" class="sheet">
-    <div class="dialog-head"><h2 id="infoTitle">拖动 <i>k</i> 时，发生了什么？</h2><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-head"><h2 id="infoTitle">What changes when you move <i>k</i>?</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body reading">
-      <h3>一张照片可以写成矩阵</h3>
-      <p>灰度图中，每个像素对应一个 0 到 255 的亮度值。照片有 <i>m</i> 行、<i>n</i> 列，就需要记录 <i>m × n</i> 个数。彩色模式会分别处理红、绿、蓝三个通道。</p>
-      <h3>把图像一项一项加回来</h3>
-      <p>奇异值分解把矩阵写成 <span class="inline-math">A = UΣVᵀ</span>。将奇异值从大到小排序，取前 <i>k</i> 项相加，就得到重建图 <span class="inline-math">A<sub>k</sub></span>。滑块每向右移动一格，就多保留一项。</p>
-      <h3>为什么能少存一些数？</h3>
-      <p>每一项只需保存长度分别为 <i>m</i> 和 <i>n</i> 的两个向量，以及一个奇异值，因此每通道共需 <span class="inline-math">k(m + n + 1)</span> 个数。这个数量小于 <i>mn</i> 时，因子表示才有数值个数上的优势。</p>
-      <p class="dialog-note">课堂上可以先点 5，再点 20。请大家说出刚才认不出、现在能看清的一处细节。</p>
+      <h3>A photo as a matrix</h3>
+      <p>Each grayscale pixel has a brightness from 0 to 255. An image with <i>m</i> rows and <i>n</i> columns stores <i>m × n</i> values. In color mode, red, green and blue each have their own matrix.</p>
+      <h3>Rebuilding an image one term at a time</h3>
+      <p>Singular value decomposition writes the image as <span class="inline-math">A = UΣVᵀ</span>. The rank-<i>k</i> image is the sum of the first <i>k</i> terms, ordered from largest to smallest singular value. The starting image <span class="inline-math">A<sub>0</sub></span> is all zeros. At row <i>r</i> and column <i>c</i>, term <i>i</i> contributes <span class="inline-math">σ<sub>i</sub> × u<sub>i</sub>[r] × v<sub>i</sub>[c]</span>.</p>
+      <p class="general-equation" role="math" aria-label="A sub k equals the sum from i equals one to k of sigma i times u i times v i transpose"><i>A</i><sub>k</sub> = <span class="summation"><span class="sum-upper">k</span><span class="sigma">∑</span><span class="sum-lower">i = 1</span></span> σ<sub>i</sub> <i>u</i><sub>i</sub> <i>v</i><sub>i</sub><sup>T</sup></p>
+      <h3>Reading the live equation</h3>
+      <p>Move from 5 to 6 to add term 6. Move back to subtract it. A jump from 5 to 20 adds terms 6 through 20. Tap the original to see the contribution at one row and column. For a color image, choose a channel in the equation.</p>
+      <p>Pixel calculations show rounded approximations to the underlying values. The displayed image clips values to the range 0–255 and rounds them to whole numbers.</p>
+      <h3>When does SVD save storage?</h3>
+      <p>Each term stores two vectors, of lengths <i>m</i> and <i>n</i>, and one singular value. Keeping <i>k</i> terms needs <span class="inline-math">k(m + n + 1)</span> values per channel. This saves storage when that count is smaller than <i>mn</i>.</p>
+      <p class="dialog-note">Try 5, then 20. Which detail can you recognize now? The change map shows where the added terms brightened or darkened the image.</p>
     </div>
   </dialog>
   <dialog id="shareDialog" aria-labelledby="shareTitle" class="sheet share-sheet">
-    <div class="dialog-head"><h2 id="shareTitle">把实验发给同学</h2><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-head"><h2 id="shareTitle">Share the experiment</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body share-body">
-      <p id="shareHelp">用手机相机扫码，或复制下方网址发到班群。</p>
-      <canvas id="shareQR" class="qr" width="300" height="300" role="img" aria-label="打开当前实验的二维码"></canvas>
+      <p id="shareHelp">Scan the QR code with a phone or send the link to your class.</p>
+      <canvas id="shareQR" class="qr" width="300" height="300" role="img" aria-label="QR code for this experiment"></canvas>
       <div id="shareControls">
-        <label for="shareUrl">课堂链接</label>
-        <div class="copy-row"><input id="shareUrl" type="text" readonly><button class="primary" id="copyLink" type="button"><svg class="icon"><use href="#i-copy"/></svg><span>复制链接</span></button></div>
+        <label for="shareUrl">Class link</label>
+        <div class="copy-row"><input id="shareUrl" type="text" readonly><button class="primary" id="copyLink" type="button"><svg class="icon"><use href="#i-copy"/></svg><span>Copy link</span></button></div>
         <span id="copyStatus" class="subtle" role="status"></span>
       </div>
-      <p id="classroomDownload" class="download-classroom" hidden>手机扫码遇到访问限制时，可用演示电脑开课。<a href="Rank-Lab-Classroom.zip" download>下载同网扫码版</a></p>
+      <p id="classroomDownload" class="download-classroom" hidden>To host on classroom Wi-Fi, use the offline pack.<a href="Rank-Lab-Classroom.zip" download>Download classroom pack</a></p>
     </div>
   </dialog>
   <dialog id="creditDialog" aria-labelledby="creditTitle" class="sheet">
-    <div class="dialog-head"><h2 id="creditTitle">示例图片与来源</h2><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-head"><h2 id="creditTitle">Image credits</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body reading" id="creditBody">
-      <h3>宇航员</h3><p>NASA 宇航员 Eileen Collins。此处取自课程资料中保留完整画面的原图面板，源图收录于 <a href="https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.astronaut" target="_blank" rel="noopener">scikit-image 图库</a>。</p>
-      <h3>古建筑与花卉</h3><p>古建筑由 <a href="https://www.flickr.com/photos/danielbuechele/6061409035/" target="_blank" rel="noopener">Daniel Büchele</a> 拍摄，花卉由 <a href="https://www.flickr.com/photos/vultilion/6056698931/" target="_blank" rel="noopener">Vultilion</a> 拍摄，通过 scikit-learn 示例图库取得。两张照片均按 <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a> 授权。页面按实验尺寸缩放，并可转换灰度或重建。</p>
-      <h3>交互参考</h3><p><a href="https://timbaumann.info/svd-image-compression-demo/" target="_blank" rel="noopener">Tim Baumann 的 SVD 图像压缩演示</a>。</p>
+      <h3>Astronaut</h3><p>NASA astronaut Eileen Collins. The photograph is also available in the <a href="https://scikit-image.org/docs/stable/api/skimage.data.html#skimage.data.astronaut" target="_blank" rel="noopener">scikit-image gallery</a>.</p>
+      <h3>Pavilion and flower</h3><p>The pavilion photo is by <a href="https://www.flickr.com/photos/danielbuechele/6061409035/" target="_blank" rel="noopener">Daniel Büchele</a> and the flower photo is by <a href="https://www.flickr.com/photos/vultilion/6056698931/" target="_blank" rel="noopener">Vultilion</a>. Both photos come from the scikit-learn sample gallery and are licensed under <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>. The lab resizes the images and can convert them to grayscale or reconstruct them.</p>
+      <h3>Interactive reference</h3><p><a href="https://timbaumann.info/svd-image-compression-demo/" target="_blank" rel="noopener">Tim Baumann’s SVD image compression demo</a>.</p>
     </div>
   </dialog>
   <dialog id="focusDialog" aria-labelledby="focusTitle" class="sheet focus-sheet">
-    <div class="dialog-head"><h2 id="focusTitle">放大对照</h2><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg class="icon"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-head"><h2 id="focusTitle">Enlarge view</h2><button type="button" class="icon-button close-dialog" aria-label="Close"><svg class="icon"><use href="#i-close"/></svg></button></div>
     <div class="dialog-body">
       <div class="focus-images">
-        <figure><figcaption>原图</figcaption><div><canvas id="originalLarge" role="img" aria-label="放大的原图"></canvas></div></figure>
-        <figure><figcaption>重建图 <span id="focusK"></span></figcaption><div><canvas id="resultLarge" role="img" aria-label="放大的重建图"></canvas></div></figure>
+        <figure><figcaption>Original</figcaption><div><canvas id="originalLarge" role="img" aria-label="Enlarged original. Tap a pixel or use the arrow keys to inspect it."></canvas><span class="pixel-marker" id="focusMarker" hidden aria-hidden="true"></span></div></figure>
+        <figure><figcaption>Reconstruction <span id="focusK"></span></figcaption><div><canvas id="resultLarge" role="img" aria-label="Enlarged reconstruction"></canvas></div></figure>
       </div>
-      <div class="focus-control"><label for="focusRange">保留项数 <strong id="focusValue"></strong></label><input type="range" id="focusRange" min="1" max="256" value="5" step="1"></div>
-      <p class="focus-formula" id="focusFormula"></p>
+      <div class="focus-control"><label for="focusRange">Terms to keep <strong id="focusValue"></strong></label><input type="range" id="focusRange" min="1" max="256" value="5" step="1"></div>
+      <div class="focus-analysis"><div id="focusMapHost"></div><div id="focusMathHost"></div></div>
     </div>
   </dialog>
 </body>

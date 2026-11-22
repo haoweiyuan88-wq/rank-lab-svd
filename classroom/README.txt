@@ -1,25 +1,25 @@
-Rank Lab · 课堂同网扫码版
+Rank Lab · Classroom Wi-Fi edition
 
-Mac 上启动课堂
-1. 将 ZIP 完整解压。让演示电脑和手机连到同一个允许设备互相访问的 Wi-Fi 或热点。
-2. 在电脑上双击 Start-Class.command。需要 Python 3.7 或更新版本，只使用自带模块。
-3. 电脑浏览器会自动打开投影二维码。请同学用手机相机扫码。班群也可以直接发终端里“学生访问”后的网址。
-4. 关闭二维码即可开始你的演示。学生可以自己选照片、拖动 k、看公式和保存重建图。展示期间保持电脑运行和启动窗口开启，下课按 Control+C 停止。
+Start a class on a Mac
 
-如果 macOS 没有直接打开启动文件
-打开“终端”，输入 python3 和一个空格，把本文件夹里的 classroom.py 拖进终端，再按回车。也可以在你平时使用的 Jupyter 里运行 %run 和 classroom.py 的完整路径。
+1. Unzip the entire pack. Connect the presenting computer and phones to the same Wi-Fi or hotspot with device-to-device access.
+2. Double-click Start-Class.command on the computer. The launcher uses Python 3.7 or later and its standard library.
+3. The presenting browser opens a QR code. Students can scan it with their phone cameras. You can also paste the “Class link” printed in Terminal into a class chat.
+4. Close the QR dialog to demonstrate. Students can choose their own pictures, change k, see the equation and save their reconstruction. Keep the computer and launcher running during class. Press Control+C to stop.
 
-若电脑提示是否允许本地网络连接
-同学需要访问本机的课堂服务，请按学校和设备的使用要求选择。程序只提供这个实验网页，照片在各自设备上处理。
+Other ways to open the experiment
 
-在其他电脑启动
-在已解压文件夹中，用 Python 3.7+ 执行 python3 classroom.py（Windows 可用 py -3 classroom.py）。浏览器若未自动打开，请把终端打印的“投影二维码”整行网址复制到电脑浏览器。
+• Open index.html directly for individual offline use.
+• On Mac or Linux, run python3 classroom.py from the unzipped folder. On Windows, use py -3 classroom.py. If a browser does not open, paste the “Project the QR code” address from the terminal into the presenting browser.
+• If macOS does not open the launcher, open Terminal, type python3 followed by a space, drag classroom.py into Terminal and press Enter.
+• If your computer asks for local network access, follow your school’s device and network rules. The server provides the experiment. Selected photos are processed on each student’s device.
 
-手机扫到新码仍打不开时
-• 核对投影下的网址与终端“学生访问”一致。电脑换 Wi-Fi 后，停止并重新启动程序，投影新的二维码。
-• 手机和电脑需要在同一网络并可互访。若校园 Wi-Fi 启用了设备隔离，可改用允许设备互访的课堂网络或个人热点，或者把 index.html 发给同学在电脑浏览器本地打开。
-• 电脑有多个网卡时，可以用 python3 classroom.py --address 本机的Wi-Fi地址 指定网卡。在 Mac 的“系统设置 → Wi-Fi → 详细信息 → TCP/IP”里可以查看 IPv4 地址。
-• 在电脑上直接双击 index.html 可个人离线使用。使用同网扫码时，应通过课堂启动程序打开。
+If a phone cannot reach the classroom server
 
-如需部署到 GitHub Pages
-index.html 已内置全部示例图片、SVD 计算程序和二维码组件，可以作为静态站点首页。分享菜单会为实际打开的 HTTP/HTTPS 网页生成二维码。
+• Check the address under the projected QR code against the printed class link. Restart the launcher after switching Wi-Fi.
+• Some campus Wi-Fi networks isolate devices. Use a network or hotspot that lets the phones reach the presenting computer, or share index.html for individual computer use.
+• On a computer with multiple network adapters, use python3 classroom.py --address followed by its Wi-Fi IPv4 address. On a Mac, find it in System Settings → Wi-Fi → Details → TCP/IP.
+
+Static hosting
+
+The standalone index.html includes the example photos, SVD code and QR generator. It can also be served from a static host. The Share dialog uses the HTTP or HTTPS address at which the page is open.

@@ -38,8 +38,8 @@ function prepareClassroomSharing() {
   const address = classroomAddress(window.location.href);
   if (!address) {
     text.textContent = location.protocol === 'file:'
-      ? '可以把这个 HTML 文件发给同学，各自在电脑上打开。需要手机扫码时，在演示电脑上运行课堂包里的 Start-Class.command。'
-      : '请用课堂启动程序显示的 Wi-Fi 地址打开，手机就能扫到这台电脑。';
+      ? 'Send this HTML file to classmates to open on a computer. For phone access, run Start-Class.command from the classroom pack on the presenting computer.'
+      : 'Open the Wi-Fi address printed by the classroom launcher to generate a QR code for this computer.';
     qr.hidden = controls.hidden = true;
     if (enabled) enabled.hidden = true;
     return;
@@ -47,15 +47,15 @@ function prepareClassroomSharing() {
   const host = address.hostname;
   const local = /^\d+\.\d+\.\d+\.\d+$/.test(host) || host.endsWith('.local');
   text.textContent = local
-    ? '让手机和演示电脑连到同一个可互访的 Wi-Fi 或热点，打开相机扫码。演示期间保持电脑和启动窗口开启。'
-    : '用手机相机扫码，或复制下方网址发到班群。';
+    ? 'Connect phones and the presenting computer to the same Wi-Fi or hotspot with device-to-device access. Scan the code and keep the computer and launcher running.'
+    : 'Scan with a phone camera or copy the link to your class chat.';
   if (enabled) enabled.hidden = local;
   field.value = address.href;
   try {
     drawClassroomQR(qr, address.href);
   } catch {
     qr.hidden = true;
-    text.textContent += ' 如二维码无法显示，可以直接复制网址。';
+    text.textContent += ' If the QR code is unavailable, copy the link below.';
   }
   if (new URLSearchParams(window.location.search).get('present') === '1' && !dialog.open) dialog.showModal();
 }

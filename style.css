@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
   --paper:#f8f9f6; --white:#fff; --ink:#18231f; --soft:#53625a; --muted:#637168; --line:#dce2d9;
-  --green:#c0ef60; --green-deep:#426b1c; --salmon:#a9442c; --sans:"Inter","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  --green:#c0ef60; --green-deep:#426b1c; --salmon:#a9442c; --sans:"Inter",system-ui,sans-serif;
   --mono:"IBM Plex Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
 }
 *{box-sizing:border-box}
@@ -45,7 +45,7 @@ h1>span{font-family:Arial,var(--sans);font-weight:745;letter-spacing:-.064em;mar
 .primary{gap:.55rem;background:var(--green);border:1px solid #a6cf54;border-radius:.65rem;padding:.72rem 1.13rem;font-weight:650;white-space:nowrap;justify-content:center}
 .primary:hover{background:#b4e94d;border-color:#8fb844}
 .upload{flex:none;align-self:center}
-.work-grid{display:grid;grid-template-columns:minmax(0,1.93fr) minmax(18.5rem,1fr);gap:1.08rem;align-items:stretch}
+.work-grid{display:grid;grid-template-columns:minmax(0,1.68fr) minmax(21rem,1fr);gap:1.08rem;align-items:stretch}
 .card{border:1px solid var(--line);border-radius:1rem;background:var(--white)}
 .comparison{position:relative;min-width:0;padding:1.35rem 1.35rem 0;display:flex;flex-direction:column;overflow:hidden}
 .panel-head{display:flex;align-items:center;justify-content:space-between;gap:.7rem}
@@ -73,8 +73,8 @@ h1>span{font-family:Arial,var(--sans);font-weight:745;letter-spacing:-.064em;mar
 }
 .image-well{width:100%;min-height:clamp(12.3rem,17.4vw,16.5rem);flex:1}
 .image-well canvas,.focus-images canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
-#original{cursor:crosshair}
-#original:focus-visible{outline:3px solid var(--green);outline-offset:-3px}
+#original,#originalLarge{cursor:crosshair}
+#original:focus-visible,#originalLarge:focus-visible{outline:3px solid var(--green);outline-offset:-3px}
 .image-well canvas[data-empty="true"]{opacity:0}
 .loading{position:absolute;bottom:.55rem;left:50%;transform:translateX(-50%);max-width:95%;width:max-content;border-radius:.4rem;padding:.32rem .65rem;background:#17231eee;color:#fff;font-size:.86rem}
 .frame-meta{justify-content:space-between;gap:.35rem;min-height:3.05rem;padding:.35rem 0}
@@ -116,13 +116,11 @@ input[type=range]::-moz-range-thumb{width:1.08rem;height:1.08rem;border-radius:5
 .formula-card{display:flex;flex-direction:column;justify-content:space-between;background-color:#1c2c25;background-image:radial-gradient(#41544870 .7px,transparent .9px);background-size:10px 10px;border-radius:1rem;padding:1.15rem 1.38rem 1.1rem;color:#fff;min-height:10.25rem}
 .formula-title{gap:.58rem}
 .formula-title h2{font-size:1.04rem;color:#eff5ed;font-weight:590}
-.fx{font:italic 1.23rem Georgia,serif;color:#cbdabd;line-height:1}
-.fx span{font-size:.77em}
 .formula-display{font:italic clamp(1.65rem,2.35vw,2.36rem)/1 Georgia,"Times New Roman",serif;display:flex;align-items:center;gap:.32em;padding:.4rem 0 .45rem;min-height:4.5rem;white-space:nowrap}
 .formula-display sub,.formula-display sup{font-size:.52em;line-height:0;position:relative;vertical-align:baseline}
 .formula-display sub{bottom:-.28em}
 .formula-display sup{top:-.58em}
-.formula-display sub[data-form-k],.sum-upper{color:#cdf987}
+.sum-upper{color:#cdf987}
 .op{font-style:normal;font-size:.78em}
 .summation{display:inline-flex;flex-direction:column;align-items:center;line-height:1;justify-content:center;margin:0 .02em}
 .sigma{font:normal 1.04em/.84 Georgia,serif}
@@ -177,14 +175,13 @@ input[type=range]::-moz-range-thumb{width:1.08rem;height:1.08rem;border-radius:5
 .focus-control label{white-space:nowrap;font-size:.93rem}
 .focus-control strong{color:var(--salmon);font-family:var(--mono)}
 .focus-control input{margin:0}
-.focus-formula{font-family:Georgia,var(--sans);color:#42573f;margin-top:.3rem}
 @media(min-width:1450px){.intro{margin-top:3rem;margin-bottom:2rem}.image-well{min-height:17.7rem}}
 @media(max-width:1120px){.wrap{width:calc(100% - 3.25rem)}.work-grid{grid-template-columns:minmax(0,1.8fr) minmax(17rem,1fr);gap:.85rem}.comparison,.rank-card,.formula-card,.numbers-card,.pixels-card{padding-left:1.05rem;padding-right:1.05rem}.frame-actions{gap:.15rem}.samples{gap:.55rem}.insights{gap:.85rem}.sample{padding-right:.38rem}}
 @media(max-width:880px){.wrap{width:calc(100% - 2.25rem)}.work-grid{grid-template-columns:1fr}.control-stack{display:grid;grid-template-columns:1.15fr 1fr;gap:.85rem}.rank-card{padding:.95rem 1.1rem}.formula-card{padding:1rem 1.1rem}.formula-display{font-size:2.2rem}.image-well{min-height:clamp(12rem,29vw,16rem)}.samples{padding:.67rem 0}.insights{grid-template-columns:1.25fr 1fr}.metrics>div+div{padding-left:.55rem}.metrics>div{padding-right:.35rem}.metrics strong{font-size:1.4rem}.pixel-body{gap:.65rem}h1{font-size:2.4rem}.intro{margin:1.65rem 0 1.25rem}}
 @media(max-width:650px){.wrap{width:calc(100% - 1.5rem)}.mast{height:3.4rem}.mast-inner{gap:.6rem}.mast-caption,.mast-divider,.nav-lab{display:none}.brand{font-size:1.22rem;gap:.4rem}.brand img{width:29px;height:29px}.mast nav{gap:.85rem;font-size:.82rem}.share-button{padding:.34rem .52rem;gap:.32rem}.share-button .icon{width:.98rem;height:.98rem}.intro{display:grid;grid-template-columns:1fr;gap:.72rem;margin:1.33rem 0 .85rem}.intro p{font-size:.94rem;margin-top:.35rem}.upload{justify-self:start;padding:.53rem .78rem;font-size:.9rem}.intro h1{font-size:2.12rem}.work-grid,.control-stack,.insights{gap:.65rem}.comparison{padding:.85rem .7rem 0}.comparison-head h2,.rank-card h2{font-size:1.03rem}.panel-head h2{gap:.36rem}.frames,.focus-images{gap:.45rem}.frames{margin-top:.65rem}.frame-head{margin-bottom:.35rem}.frame-title{font-size:.84rem;gap:.32rem}.image-well{min-height:clamp(8rem,37vw,13rem);border-radius:.36rem}.frame-meta{min-height:2.65rem;gap:.2rem;flex-wrap:wrap}.frame-meta>span,.quiet{font-size:.74rem}.quiet{padding:.16rem .1rem;gap:.2rem}.quiet .icon{width:.84rem;height:.84rem}.frame-actions{gap:.4rem}.sample-options{gap:.3rem}.samples{gap:.44rem;padding:.58rem 0}.samples-label,.sample{font-size:.76rem}.sample{gap:.25rem}.sample img{width:1.35rem;height:1.35rem}.card,.formula-card{border-radius:.7rem}.control-stack{grid-template-columns:1fr 1fr;align-items:stretch}.rank-card,.formula-card{padding:.78rem .65rem}.rank-card .subtle{display:none}.formula-title{gap:.27rem}.formula-title h2{font-size:.91rem}.formula-card{min-height:0;justify-content:center;gap:.6rem}.formula-display{font-size:clamp(1.3rem,5.4vw,2rem);min-height:2.65rem;gap:.22em;padding:.1rem 0}.formula-card p,.control-desc{font-size:.76rem}.rank-line{margin-top:.55rem;gap:.2rem}.math-k{font-size:1.65rem}.equals{font-size:1rem}.rank-label{gap:.18rem}.rank-label output{font-size:2.05rem}.stepper{gap:.19rem}.stepper button{width:1.48rem;height:1.48rem}.stepper .icon{width:.72rem;height:.72rem}.control-desc{margin-top:.15rem}input[type=range]{margin:.32rem 0 .1rem}.range-captions{font-size:.68rem}.presets{gap:.2rem;margin-top:.44rem}.presets button{font-size:.72rem;min-width:0;flex:1;padding:.12rem .13rem}.insights{grid-template-columns:1fr;margin-top:.65rem}.numbers-card,.pixels-card{padding:.85rem}.metrics{margin:.55rem 0}.metrics strong{font-size:1.4rem}.metrics span,.calc-note,.pixel-body p{font-size:.82rem}.fineprint{font-size:.76rem}.pixel-body{margin-top:.65rem}.footer{font-size:.74rem;margin-top:.95rem;padding:.7rem 0}.dialog-head,.dialog-body{padding:.85rem}.focus-images figure>div{height:32vh}.focus-control{gap:.6rem}.dialog-head h2{font-size:1.1rem}}
 @media(max-width:365px){.wrap{width:calc(100% - 1rem)}.rank-card,.formula-card{padding:.72rem .43rem}.samples{flex-wrap:wrap}.range-captions{font-size:.64rem}.focus-sheet{width:calc(100vw - .65rem)}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-#pixelMarker{position:absolute;pointer-events:none;transform:translate(-50%,-50%);width:.83rem;height:.83rem;border:1px solid #cff58e;box-shadow:0 0 0 1px #18291ccc;border-radius:.12rem}
+.pixel-marker{position:absolute;pointer-events:none;transform:translate(-50%,-50%);width:.83rem;height:.83rem;border:1px solid #cff58e;box-shadow:0 0 0 1px #18291ccc;border-radius:.12rem}
 .file-meta{display:flex;align-items:center;gap:.38rem;min-width:0;flex:1;overflow:hidden}
 #sourceTitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:9rem;font-weight:580}
 #dimensions{white-space:nowrap}
@@ -193,8 +190,99 @@ input[type=range]::-moz-range-thumb{width:1.08rem;height:1.08rem;border-radius:5
 @media(max-width:650px){#energy{display:none}#sourceTitle{max-width:3.3rem}.file-meta{gap:.19rem}#sourceTitle:not(:empty)+#dimensions::before{padding-right:.2rem}}
 @media(max-width:395px){#sourceTitle{max-width:2.9rem}.quiet{font-size:.7rem}.frame-actions{gap:.28rem}}
 
-.formula-display sub[data-form-k]{font-size:.65em;font-weight:600}.sum-upper{font-size:.52em}.focus-formula sup,.focus-formula sub{font-size:.75em}
+.sum-upper{font-size:.52em}
 
 canvas.qr{width:clamp(200px,48vw,310px);height:auto;max-width:100%;background:white;image-rendering:pixelated}
 .share-body .download-classroom{padding-top:.85rem;margin-top:.45rem;text-align:left;border-top:1px solid var(--line);font-size:.85rem}
 .download-classroom a{display:inline-block;margin-left:.28rem;color:var(--green-deep);font-weight:600;text-underline-offset:.18em}
+
+/* Keep the rank, the symbolic step and the real pixel arithmetic together. */
+#formulaHome{min-width:0}
+.rank-card{flex:0}
+.formula-card{justify-content:flex-start;gap:0;min-width:0;padding:1.12rem 1.25rem 1.18rem}
+.formula-title{flex-wrap:wrap;gap:.25rem .6rem}
+.formula-title h2{font-size:1.08rem;font-weight:650}
+#energy{display:inline-block;margin-left:auto;color:#d2edb6;font:550 .76rem/1.4 var(--sans)}
+.formula-card .step-description{margin-top:.62rem;color:#c9dbbd;font-size:.8rem;font-weight:580}
+.formula-display{gap:.28em;line-height:1.05;min-height:3.4rem;padding:.36rem 0 .6rem;font-size:clamp(1.55rem,2.15vw,2rem);flex-wrap:wrap;white-space:normal}
+.formula-display .changed-term{display:inline-flex;align-items:center;gap:.23em;color:#cff58d;background:#c9ef9c10;border-radius:.24em;padding:.08em .16em .14em;white-space:nowrap}
+.formula-display>span,.changed-term>span{white-space:nowrap}
+.formula-display sub{font-size:.59em}
+.formula-display .summation{font-size:.93em}
+.pixel-heading{display:flex;justify-content:space-between;align-items:center;gap:.5rem;border-top:1px solid #63756580;padding-top:.72rem}
+.pixel-heading h3{font-size:.92rem;font-weight:630;line-height:1.3}
+#probeLocation,.term-caption{color:#bed0bf;font-size:.74rem;font-variant-numeric:tabular-nums}
+.channel-control select{border:1px solid #719277;border-radius:.35rem;background:#2a4034;color:#f5faec;font:600 .78rem/1.4 var(--sans);padding:.2rem}
+.pixel-equation{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,.96fr) auto minmax(0,1fr);gap:.2rem;align-items:end;margin:.43rem 0 .62rem}
+.pixel-equation>div{display:flex;flex-direction:column;min-width:0;padding:.28rem .05rem}
+.pixel-equation small,.factor small{color:#c8d7c9;font:500 .72rem/1.4 var(--sans);white-space:nowrap}
+.pixel-equation strong{font:610 clamp(.97rem,1.58vw,1.43rem)/1.4 var(--mono);letter-spacing:-.065em}
+.pixel-equation .change-value strong,.pixel-equation #deltaSign{color:#cef486}
+.pixel-op{align-self:end;color:#c6d3c6;font:500 1rem/1.45 var(--mono);padding-bottom:.33rem}
+.term-detail{border-top:1px solid #63756565;padding-top:.48rem}
+.term-caption{color:#e4ebe1;font-weight:580}
+.formula-card .factor-equation{display:flex;align-items:flex-end;justify-content:flex-start;flex-wrap:wrap;gap:.08rem .38rem;margin-top:.19rem;color:#eff5ec;font-variant-numeric:tabular-nums}
+.factor{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.factor small{color:#b7c9b7;font-size:.67rem}
+.factor small sub{font-size:.78em}
+.factor b{font:500 .8rem/1.45 var(--mono);letter-spacing:-.045em}
+.factor-op{font-size:.85rem;color:#b9c7b9}
+.change-strip{display:flex;align-items:center;gap:.8rem;border-top:1px solid var(--line);padding:.7rem 0}
+.map-well{flex:0 0 5.6rem;height:4.15rem;background:#2e3a37;border-radius:.35rem;overflow:hidden}
+.map-well canvas{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+.map-notes{min-width:0}
+.map-notes h3{font-size:.92rem;font-weight:640;line-height:1.35}
+.map-notes p,.map-notes small,.map-legend{font-size:.74rem;line-height:1.4;color:var(--soft)}
+.map-notes small{display:block;margin-top:.1rem;color:var(--muted)}
+.map-legend{display:flex;flex-wrap:wrap;gap:0 .68rem;margin-top:.08rem}
+.map-legend span{display:inline-flex;gap:.29rem;align-items:center}
+.map-legend i{width:.58rem;height:.58rem;display:inline-block;border-radius:2px;border:1px solid #27352a38}
+.brighter{background:#cdf789}.darker{background:#ff9a80}.unchanged{background:#2e3a37}
+.general-equation{font:italic 1.32rem Georgia,serif;padding:.37rem 0}
+.general-equation .summation{vertical-align:middle}
+.general-equation .sum-upper{color:var(--green-deep)}
+.focus-analysis{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.5fr);gap:1rem;align-items:center;margin-top:.85rem}
+#focusMapHost .change-strip{flex-direction:column;align-items:flex-start;border:0;gap:.48rem;padding:0}
+#focusMapHost .map-well{width:100%;max-width:16rem;height:clamp(6rem,17vh,10rem);flex:auto}
+#focusMathHost .formula-card{margin:0}
+#focusMathHost .pixel-equation strong{font-size:clamp(1.12rem,2vw,1.58rem)}
+#focusMathHost .factor b{font-size:.9rem}
+.focus-sheet .focus-images figure>div{height:min(37vh,23rem)}
+@media(min-width:881px) and (max-width:1120px){
+  .work-grid{grid-template-columns:minmax(0,1.52fr) minmax(19.5rem,1fr)}
+  .formula-card{padding-inline:.9rem}
+}
+@media(min-width:651px) and (max-width:880px){
+  .control-stack{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);align-items:start}
+}
+@media(max-width:650px){
+  .control-stack{display:flex;flex-direction:column}
+  .rank-card,.formula-card{padding:.85rem .9rem}
+  .rank-card .subtle{display:inline}
+  .rank-line{margin-top:.45rem}
+  .rank-card .stepper button{width:2rem;height:2rem}
+  .rank-card input[type=range]{height:1.7rem}
+  .presets button{flex:0 1 3.3rem;font-size:.82rem}
+  .formula-card .formula-title h2{font-size:1.06rem}
+  .formula-display{min-height:3.15rem;font-size:clamp(1.55rem,6.1vw,2rem)}
+  .pixel-equation strong{font-size:clamp(1.05rem,4.5vw,1.45rem)}
+  .factor b{font-size:.85rem}
+  .change-strip{padding:.52rem 0;gap:.58rem}
+  .map-well{flex-basis:4.55rem;height:3.6rem}
+  .map-notes h3{font-size:.85rem}
+  .map-legend{gap:0 .55rem}
+  .mast nav{gap:.55rem}
+  .file-meta{flex:1 1 9.5rem}
+  .frame-actions{margin-left:auto}
+  .metrics span{line-height:1.25;display:block}
+  .focus-sheet .focus-images figure>div{height:min(26vh,13rem)}
+  .focus-analysis{grid-template-columns:minmax(0,1fr);gap:.6rem}
+  #focusMathHost{grid-row:1}
+  #focusMapHost .change-strip{flex-direction:row;align-items:center}
+  #focusMapHost .map-well{width:5.2rem;height:4rem;flex:none}
+}
+@media(max-width:380px){
+  .formula-card{padding-inline:.7rem}
+  .sample-options{column-gap:.2rem}
+  .samples{flex-wrap:wrap}
+}

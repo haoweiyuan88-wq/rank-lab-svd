@@ -66,7 +66,7 @@ def wifi_address():
         except OSError:
             continue
         return str(address)
-    raise RuntimeError('未找到可用的 Wi-Fi 地址。请先连接课堂 Wi-Fi 或个人热点，再重新启动。')
+    raise RuntimeError('No Wi-Fi address was found. Connect to the classroom Wi-Fi or a hotspot and try again.')
 
 
 def handler_for(page):
@@ -118,18 +118,18 @@ def classroom_server(address, port, page):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='在课堂电脑的 Wi-Fi 地址上启动 SVD 实验室')
-    parser.add_argument('--address', metavar='IPv4', help='指定本机的 Wi-Fi IPv4 地址')
-    parser.add_argument('--port', type=int, help='监听端口，默认优先使用 8765')
-    parser.add_argument('--no-browser', action='store_true', help='只打印课堂网址')
+    parser = argparse.ArgumentParser(description='Start SVD Image Lab on the presenting computer’s Wi-Fi address.')
+    parser.add_argument('--address', metavar='IPv4', help='Use this computer’s Wi-Fi IPv4 address.')
+    parser.add_argument('--port', type=int, help='Listening port (8765 is preferred by default).')
+    parser.add_argument('--no-browser', action='store_true', help='Print the class URL without opening a browser.')
     options = parser.parse_args()
     try:
         address = str(IPv4Address(options.address)) if options.address else wifi_address()
         ip = IPv4Address(address)
         if ip.is_loopback or ip.is_unspecified or ip.is_multicast:
-            raise ValueError('请使用本机的 Wi-Fi IPv4 地址。')
+            raise ValueError('Use this computer’s Wi-Fi IPv4 address.')
         if options.port is not None and not 0 <= options.port <= 65535:
-            raise ValueError('端口应在 0 到 65535 之间。')
+            raise ValueError('Choose a port between 0 and 65535.')
         folder = Path(__file__).resolve().parent
         page_path = folder/'index.html'
         if not page_path.is_file():
@@ -137,19 +137,19 @@ def main():
         page = page_path.read_bytes()
         with classroom_server(address, options.port, page) as server:
             base = 'http://{}:{}/'.format(*server.server_address[:2])
-            print('\n学生访问  ' + base, flush=True)
-            print('投影二维码  ' + base + '?present=1', flush=True)
-            print('请先让手机加入与电脑相同、允许设备互访的 Wi-Fi。')
-            print('请保持此窗口开启。下课后按 Control+C 结束。\n', flush=True)
+            print('\nClass link  ' + base, flush=True)
+            print('Project the QR code  ' + base + '?present=1', flush=True)
+            print('Connect phones and this computer to the same Wi-Fi with device-to-device access.')
+            print('Keep this window open. Press Control+C to stop after class.\n', flush=True)
             if not options.no_browser:
                 opener = threading.Timer(0.2, webbrowser.open, (base + '?present=1',))
                 opener.daemon = True
                 opener.start()
             server.serve_forever()
     except KeyboardInterrupt:
-        print('\n课堂分享已结束。')
+        print('\nClassroom sharing has ended.')
     except (ValueError, OSError, RuntimeError) as error:
-        print('课堂服务未能启动：{}'.format(error))
+        print('The classroom server could not start. {}'.format(error))
         return 1
     return 0
 

@@ -18,12 +18,12 @@ def standalone_page():
     app = (STATIC / 'app.js').read_text(encoding='utf-8')
     # Browser-local uploads use blob URLs already. For bundled samples, read
     # the exact same data URL from their thumbnails to avoid repeating bytes.
-    app = app.replace("new Worker('svd-worker.js')", "new Worker(classroomWorkerURL())")
+    app = re.sub(r"new Worker\('svd-worker\.js(?:\?[^']*)?'\)", "new Worker(classroomWorkerURL())", app)
     app = app.replace("selectSource('assets/'+key+'.jpg',samples[key],key,false)",
                       "selectSource(button.querySelector('img').src,samples[key],key,false)")
     app = app.replace("selectSource('assets/astronaut.jpg',samples.astronaut,'astronaut',false)",
                       """selectSource(document.querySelector('[data-sample="astronaut"] img').src,samples.astronaut,'astronaut',false)""")
-    if "assets/" in app or "new Worker('svd-worker.js')" in app:
+    if "assets/" in app or "new Worker('svd-worker.js" in app:
         raise ValueError('The offline sample or worker path needs updating.')
     helper = """
 let classroomWorkerObjectURL;
@@ -42,8 +42,9 @@ function classroomWorkerURL() {
         file = STATIC / name
         encoded = b64encode(file.read_bytes()).decode('ascii')
         return '{}="data:{};base64,{}"'.format(attr, assets[file.suffix], encoded)
-    page = page.replace('<link rel="stylesheet" href="style.css">','<style>\n'+style+'\n</style>')
-    scripts = re.findall(r'<script defer src="([^"]+)"></script>', page)
+    page = re.sub(r'<link rel="stylesheet" href="style\.css(?:\?[^"]*)?">',
+                  lambda _: '<style>\n'+style+'\n</style>', page)
+    scripts = [url.split('?', 1)[0] for url in re.findall(r'<script defer src="([^"]+)"></script>', page)]
     page = re.sub(r' *<script defer src="[^"]+"></script>\n', '', page)
     page = re.sub(r'(src|href)="(assets/[^"]+)"', image, page)
     # The downloadable copy already contains the working classroom launcher.
